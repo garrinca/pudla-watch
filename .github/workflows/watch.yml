@@ -1,12 +1,18 @@
 name: PUDLA снаружи
 # Check of https://pudla.app from outside Timeweb, once a minute (see watch.sh).
 # Each run lasts ~50 min; the schedule starts the next one; one at a time (the next waits, not cancels).
+# «Run workflow» with «test» on: only one trial message to the channel (its own group, so it never waits for a check).
 on:
   schedule:
     - cron: '*/10 * * * *'
   workflow_dispatch:
+    inputs:
+      test:
+        description: 'Только пробное сообщение в канал'
+        type: boolean
+        default: false
 concurrency:
-  group: watch
+  group: ${{ inputs.test && 'test' || 'watch' }}
   cancel-in-progress: false
 permissions:
   contents: write
@@ -21,3 +27,4 @@ jobs:
         env:
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
           TG_CHAT: ${{ secrets.TG_CHAT }}
+          TEST: ${{ inputs.test && '1' || '' }}

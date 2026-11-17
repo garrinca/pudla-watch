@@ -48,6 +48,14 @@ save() { # commit the state when it changed (and the weekly heartbeat)
     && { git pull -q --rebase || true; git push -q || echo "не удалось сохранить состояние"; }
 }
 
+# TEST=1 (the «Run workflow» button with «test» on): one message to the channel, to see the token and the chat work
+if [ -n "${TEST:-}" ]; then
+  r=$(probe)
+  tg "🧪 Проверка PUDLA снаружи Timeweb подключена. Сейчас pudla.app: $([ "$r" = ok ] && echo 'открывается' || echo "НЕ открывается ($r)"). Дальше сюда придёт сообщение, только если приложение не откроется 5 минут подряд." \
+    && echo "пробное сообщение отправлено" || { echo "пробное сообщение НЕ отправлено"; exit 1; }
+  exit 0
+fi
+
 kind=ok fails=0 since=0 alerted=0 last=0
 [ -f "$STATE" ] && read -r kind fails since alerted last < "$STATE"
 [ -f "$BEAT" ] || echo 0 > "$BEAT"
